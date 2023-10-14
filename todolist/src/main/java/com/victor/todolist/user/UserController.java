@@ -1,15 +1,25 @@
 package com.victor.todolist.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UserController {
+    @Autowired
+    private IuserRepository userRepository;
 
     @PostMapping("/user")
-    public void create(@RequestBody UserModel user) {
-        System.out.println(user.name);
+    public ResponseEntity create(@RequestBody UserModel userModel) {
+        var user = this.userRepository.findByUserName(userModel.getUserName());
+        if (user != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário já existe");
+        }
 
+        var userCreated = this.userRepository.save(userModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
     }
 }
